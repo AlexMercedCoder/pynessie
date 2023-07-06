@@ -44,13 +44,8 @@ def get_config_v2(
     :return: json config data
     """
     timeout_sec = _sanitize_timeout(timeout_sec)
-    response = cast(dict, _get(base_url + "/config", auth, ssl_verify, timeout_sec=timeout_sec))
+    return cast(dict, _get(base_url + "/config", auth, ssl_verify, timeout_sec=timeout_sec))
 
-    # Handle potential errors
-    if not response:
-        raise Exception(f'Failed to get references: {response.status_code} {response.text}')
-
-    return response
 
 ## GET to /v2/trees
 def all_references_v2(
@@ -87,13 +82,7 @@ def all_references_v2(
     params = {k: v for k, v in params.items() if v is not None}
 
     timeout_sec = _sanitize_timeout(timeout_sec)
-    response = cast(dict, _get(base_url + "/trees", auth, ssl_verify, params=params, timeout_sec=timeout_sec))
-
-    # Handle potential errors
-    if not response:
-        raise Exception(f'Failed to get references: {response.status_code} {response.text}')
-
-    return response
+    return cast(dict, _get(base_url + "/trees", auth, ssl_verify, params=params, timeout_sec=timeout_sec))
 
 ## Post to /v2/trees
 def create_reference_v2(
@@ -122,13 +111,8 @@ def create_reference_v2(
 
     ref_json = jsonlib.dumps(source_reference)
 
-    response = cast(dict, _post(base_url + "/trees", auth, ref_json, ssl_verify=ssl_verify, params=params))
+    return cast(dict, _post(base_url + "/trees", auth, ref_json, ssl_verify=ssl_verify, params=params))
 
-    # Handle potential errors
-    if not response:
-        raise Exception(f'Failed to create reference: {response.status_code} {response.text}')
-
-    return response
 
 ## Get to /v2/trees/{ref}
 def get_referencev2(
@@ -155,13 +139,7 @@ def get_referencev2(
         params['fetch'] = fetch
 
     timeout_sec = _sanitize_timeout(timeout_sec)
-    response = cast(dict, _get(base_url + f"/trees/{ref}", auth, ssl_verify, params=params, timeout_sec=timeout_sec))
-
-    # If the response was successful, no Exception will be raised
-    if not response:
-        raise Exception(f'Failed to get reference details: {response.status_code} {response.text}')
-
-    return response
+    return cast(dict, _get(base_url + f"/trees/{ref}", auth, ssl_verify, params=params, timeout_sec=timeout_sec))
 
 ## Function for Getting the Latest Hash of a Reference
 def get_hash(
@@ -191,7 +169,7 @@ def get_hash(
 
 
 ## Post to /v2/trees/{branch@hash}/history/commit
-def create_commitv2(
+def commitv2(
     operations: dict,
     base_url: str,
     auth: Optional[AuthBase],
@@ -217,12 +195,8 @@ def create_commitv2(
     payload = jsonlib.dumps(operations)
 
     timeout_sec = _sanitize_timeout(timeout_sec)
-    response = cast(dict, _post(url, auth, payload, ssl_verify=ssl_verify, timeout_sec=timeout_sec))
+    return cast(dict, _post(url, auth, payload, ssl_verify=ssl_verify, timeout_sec=timeout_sec))
 
-    if not response:
-        raise Exception(f'Request failed with status {response.status_code} {response.text}')
-
-    return response
 
 ## Post to /v2/trees/{branch@hash}/history/merge
 def mergev2(
@@ -251,12 +225,7 @@ def mergev2(
     payload = jsonlib.dumps(merge)
 
     timeout_sec = _sanitize_timeout(timeout_sec)
-    response = cast(dict, _post(url, auth, payload, ssl_verify=ssl_verify, timeout_sec=timeout_sec))
-
-    if not response:
-        raise Exception(f'Request failed with status {response.status_code} {response.text}')
-
-    return response
+    return cast(dict, _post(url, auth, payload, ssl_verify=ssl_verify, timeout_sec=timeout_sec))
 
 
 ## post to /v2/trees/{branch@hash}/history/transplant
@@ -286,12 +255,8 @@ def cherry_pickv2(
     payload = jsonlib.dumps(transplant)
 
     timeout_sec = _sanitize_timeout(timeout_sec)
-    response = cast(dict, _post(url, auth, payload, ssl_verify=ssl_verify, timeout_sec=timeout_sec))
+    return cast(dict, _post(url, auth, payload, ssl_verify=ssl_verify, timeout_sec=timeout_sec))
 
-    if not response:
-        raise Exception(f'Request failed with status {response.status_code} {response.text}')
-
-    return response
 
 
 ## Get to /trees/{from_ref}/diff/{to_ref}
@@ -343,12 +308,7 @@ def get_diffv2(
     params = {k: v for k, v in params.items() if v is not None}
 
     timeout_sec = _sanitize_timeout(timeout_sec)
-    response = cast(dict, _get(url, auth, params, ssl_verify=ssl_verify, timeout_sec=timeout_sec))
-
-    if not response:
-        raise Exception(f'Request failed with status {response.status_code} {response.text}')
-
-    return response
+    return cast(dict, _get(url, auth, params, ssl_verify=ssl_verify, timeout_sec=timeout_sec))
 
 ## Post to /trees/{ref}/
 def assignv2(
@@ -372,10 +332,7 @@ def assignv2(
     url = f"/trees/{ref}"
     params = {"type": ref_type} if ref_type else {}
 
-    try:
-        _put(base_url + url, auth, body, ssl_verify=ssl_verify, params=params)
-    except Exception as err:
-        print(f'Error occurred: {err}')
+    return _put(base_url + url, auth, body, ssl_verify=ssl_verify, params=params)
 
 ## Delete to /trees/{ref}@{ref_hash}
 def delete_referencev2(
@@ -399,17 +356,15 @@ def delete_referencev2(
     url = f"/trees/{ref}@{ref_hash}"
     params = {"type": ref_type} if ref_type else {}
 
-    try:
-        _delete(base_url + url, auth, ssl_verify=ssl_verify, params=params)
-    except Exception as err:
-        print(f'Error occurred: {err}')
+    return _delete(base_url + url, auth, ssl_verify=ssl_verify, params=params)
+
 
 ## Get to /trees/{ref}/contents
 def get_contentsv2(
     base_url: str,
     auth: Optional[AuthBase],
     ref: str,
-    keys: List[str],
+    keys: list[str],
     with_doc: bool = False,
     ssl_verify: bool = True
 ) -> Union[dict, list]:
@@ -430,17 +385,15 @@ def get_contentsv2(
         "with-doc": with_doc
     }
 
-    try:
-        return cast(dict,_get(base_url + url, auth, ssl_verify=ssl_verify, params=params))
-    except Exception as err:
-        print(f'Error occurred: {err}')
+    return cast(dict,_get(base_url + url, auth, ssl_verify=ssl_verify, params=params))
+
 
 ## Post to /trees/{ref}/contents
 def get_contentsv2_post(
     base_url: str,
     auth: Optional[AuthBase],
     ref: str,
-    keys: List[str],
+    keys: list[str],
     with_doc: bool = False,
     ssl_verify: bool = True
 ) -> Union[dict, list]:
@@ -463,10 +416,8 @@ def get_contentsv2_post(
         "keys": keys
     }
 
-    try:
-        return cast(dict ,_post(base_url + url, auth, json=payload, ssl_verify=ssl_verify, params=params))
-    except Exception as err:
-        print(f'Error occurred: {err}')
+    return cast(dict ,_post(base_url + url, auth, json=payload, ssl_verify=ssl_verify, params=params))
+
 
 
 ## Get to /trees/{ref}/contents/{key}
@@ -494,28 +445,7 @@ def get_contentv2(
         "with-doc": with_doc
     }
 
-    try:
-        response = _get(base_url + url, auth, ssl_verify=ssl_verify, params=params)
-        status_code = response.status_code
-
-        if 200 <= status_code < 300:
-            return cast(dict, response)
-
-        error_messages = {
-            400: 'Invalid input, ref name not valid',
-            401: 'Invalid credentials provided',
-            403: 'Not allowed to view the given reference or read object content for a key',
-            404: "Table not found on 'ref' or non-existent reference",
-        }
-
-        if status_code in error_messages:
-            raise HTTPError(error_messages[status_code])
-
-    except HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
-    except Exception as err:
-        print(f'Other error occurred: {err}')
-
+    return _get(base_url + url, auth, ssl_verify=ssl_verify, params=params)
 
 ## Get to /trees/{ref}/entries
 def list_tablesv2(
@@ -563,27 +493,8 @@ def list_tablesv2(
 
     params = {k: v for k, v in params.items() if v is not None}
 
-    try:
-        response = _get(base_url + url, auth, ssl_verify=ssl_verify, params=params)
-        status_code = response.status_code
+    return _get(base_url + url, auth, ssl_verify=ssl_verify, params=params)
 
-        if 200 <= status_code < 300:
-            return cast(dict, response)
-
-        error_messages = {
-            400: 'Invalid input, ref name not valid',
-            401: 'Invalid credentials provided',
-            403: 'Not allowed to view the given reference or fetch entries for it',
-            404: 'Ref not found',
-        }
-
-        if status_code in error_messages:
-            raise HTTPError(error_messages[status_code])
-
-    except HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
-    except Exception as err:
-        print(f'Other error occurred: {err}')
 
 
 ## Get to /trees/{ref}/history
@@ -623,24 +534,4 @@ def reflogv2(
 
     params = {k: v for k, v in params.items() if v is not None}
 
-    try:
-        response = _get(base_url + url, auth, ssl_verify=ssl_verify, params=params)
-        status_code = response.status_code
-
-        if 200 <= status_code < 300:
-            return response
-
-        error_messages = {
-            400: 'Invalid input, ref name not valid',
-            401: 'Invalid credentials provided',
-            403: 'Not allowed to view the given reference or its commit log',
-            404: 'Ref not found',
-        }
-
-        if status_code in error_messages:
-            raise HTTPError(error_messages[status_code])
-
-    except HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
-    except Exception as err:
-        print(f'Other error occurred: {err}')
+    return _get(base_url + url, auth, ssl_verify=ssl_verify, params=params)
