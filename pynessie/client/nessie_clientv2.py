@@ -89,7 +89,7 @@ from pynessie.model import (
 )
 
 
-class NessieClient:
+class NessieClientV2:
     """Base Nessie Client."""
 
     def __init__(self, config: confuse.Configuration) -> None:
@@ -109,8 +109,14 @@ class NessieClient:
 
         :return: list of Nessie References
         """
-        references = all_references(self._base_url, self._auth, self._ssl_verify, fetch_all)
-        return ReferencesResponseSchema().load(references)
+        references = all_references_v2(
+            base_url=self._base_url,
+            auth=self._auth,
+            ssl_verify=self._ssl_verify,
+            fetch= "ALL" if fetch_all else "MINIMAL"
+            )
+        # return ReferencesResponseSchema().load(references)
+        return references
 
     def get_reference(self, name: Optional[str]) -> Reference:
         """Fetch a ref.
